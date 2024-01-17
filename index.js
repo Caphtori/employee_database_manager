@@ -49,7 +49,7 @@ async function loadFirstQuestion(){
                     console.log('tbd');
                     break;
                 case 'Delete':
-                    console.log('tbd');
+                    deleteSimple()
                     break;
                 case 'Update':
                     console.log('tbd');
@@ -89,6 +89,19 @@ async function viewSimple(){
     // conclusion(categoryChoice)
     db.end()
 };
+
+async function deleteSimple(){
+    const getEntries = await myQuery(`SELECT * FROM ${categoryChoice}`);
+    prompt({
+        type: "list",
+        message: "Which would you like to delete?",
+        name: "deleteChoice",
+        choices: getEntries
+    })
+    .then(async(result)=>{
+        await myQuery(`DELETE FROM ${categoryChoice} WHERE id=${result.deleteChoice.id}`)
+    })
+}
 
 // Special Questions
 async function conclusion(category){
