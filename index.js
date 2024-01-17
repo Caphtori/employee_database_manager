@@ -81,12 +81,18 @@ async function questionTwo(category){
 
 // repeat questions
 async function viewSimple(){
-    // const tableName = table.toLowerCase();
+    switch(categoryChoice){
+        case 'departmenst':
+            const viewEntries = await myQuery(`SELECT * FROM ${categoryChoice}`);
+            break;
+        case 'roles':
+            await myQuery ( "SELECT role.id, role.title, department.name AS department, role.salary FROM role LEFT JOIN department on role.department_id = department.id;");
+        case 'employees':
+            await myQuery("SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;")
+    }
+    
     const viewEntries = await myQuery(`SELECT * FROM ${categoryChoice}`);
-    // print(...viewEntries)
-    console.log(viewEntries)
-    // return;
-    // conclusion(categoryChoice)
+    console.log(viewEntries);
     db.end()
 };
 
@@ -105,25 +111,37 @@ async function deleteSimple(){
 }
 
 async function addEntry(){
-    const answers = []
-    // const singular = categoryChoice.slice(0, -1);
-    const columnsData = await myQuery(`SHOW COLUMNS FROM ${categoryChoice}`);
-    const columnNames = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true).join(', ')
-    const columns = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true)
-    .map((q)=>{
-        return {
-            type: 'input',
-            message: `Enter ${q}.`,
-            name: 'columnAnswers'
-        }
-    })
-    for (let i =0; i<columns.length; i++){
-        const result = await prompt(columns[i])
-        answers.push(result)
+    switch(categoryChoice){
+        case 'role':
+            const departmentsData = await myQuery(`SELECT * FROM ${categoryChoice}`);
+            const departments = departmentsData
+            .map(({ id, name })=>{
+                id,
+                name
+            })
+            prompt([{
+                
+            }])
     }
-    const formatAnswers = answers.map((answer)=>answer.columnAnswers).join(', ');
-    console.log(formatAnswers)
-    await myQuery(`INSERT INTO ${categoryChoice}(${columnNames}) VALUES ?`, formatAnswers);
+    // const answers = []
+    // const singular = categoryChoice.slice(0, -1);
+    // const columnsData = await myQuery(`SHOW COLUMNS FROM ${categoryChoice}`);
+    // const columnNames = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true).join(', ')
+    // const columns = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true)
+    // .map((q)=>{
+    //     return {
+    //         type: 'input',
+    //         message: `Enter ${q}.`,
+    //         name: 'columnAnswers'
+    //     }
+    // })
+    // for (let i =0; i<columns.length; i++){
+    //     const result = await prompt(columns[i])
+    //     answers.push(result)
+    // }
+    // const formatAnswers = answers.map((answer)=>answer.columnAnswers).join(', ');
+    // console.log(formatAnswers)
+    // await myQuery(`INSERT INTO ${categoryChoice}(${columnNames}) VALUES ?`, formatAnswers);
     // columns.forEach(async (column)=>{
     //     prompt([{
     //         columns
