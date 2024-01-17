@@ -92,20 +92,26 @@ async function viewSimple(){
     }
     
     const viewEntries = await myQuery(`SELECT * FROM ${categoryChoice}`);
-    console.log(viewEntries);
+    console.table(viewEntries);
     db.end()
 };
 
 async function deleteSimple(){
-    const getEntries = await myQuery(`SELECT * FROM ${categoryChoice}`);
+    const getEntries = await myQuery(`SELECT * FROM ${categoryChoice}`)
+    const entries = getEntries.map((e)=>({
+        name: e.name||e.title,
+        value: e.id
+    }))
+    console.log(entries)
     prompt({
         type: "list",
         message: "Which would you like to delete?",
         name: "deleteChoice",
-        choices: getEntries
+        choices: entries
     })
     .then(async(result)=>{
-        await myQuery(`DELETE FROM ${categoryChoice} WHERE id=${result.deleteChoice.id}`)
+        // await myQuery(`DELETE FROM ${categoryChoice} WHERE id=${result.deleteChoice.value}`)
+        db.promise().query(`DELETE FROM ${categoryChoice} WHERE id = ?`, result)
     })
     .then(db.end())
 }
@@ -113,16 +119,43 @@ async function deleteSimple(){
 async function addEntry(){
     switch(categoryChoice){
         case 'role':
-            const departmentsData = await myQuery(`SELECT * FROM ${categoryChoice}`);
+            const departmentsData = await myQuery(`SELECT * FROM department`);
             const departments = departmentsData
             .map(({ id, name })=>{
-                id,
-                name
+                return {
+                    name,
+                    value: id
+                }
             })
+            console.log(departments)
             prompt([{
-                
+                    type: 'input',
+                    message: "Enter name for new roll.",
+                    name: 'title',
+                },
+                {
+                    type: 'input',
+                    message: 'Enter salary of new role.',
+                    name: "salary"
+                },
+                {
+                    type: 'list',
+                    message: "Choose a department for new role.",
+                    name: 'dept_id',
+                    choices: departments
+                }
+            ]).then((role)=>{
+                return db.promise().query("INSERT INTO role SET ?", role);
+            }).then(() => console.log(`New role added.`))
+        
+
+        case 'department':
+            prompt([{
+                type:'input',
+                massage: "Enter new department name."
+
             }])
-    }
+    };
     // const answers = []
     // const singular = categoryChoice.slice(0, -1);
     // const columnsData = await myQuery(`SHOW COLUMNS FROM ${categoryChoice}`);
