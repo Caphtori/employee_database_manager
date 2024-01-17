@@ -46,7 +46,7 @@ async function loadFirstQuestion(){
                     viewSimple(categoryChoice);
                     break;
                 case 'Add':
-                    console.log('tbd');
+                    addEntry();
                     break;
                 case 'Delete':
                     deleteSimple()
@@ -101,6 +101,47 @@ async function deleteSimple(){
     .then(async(result)=>{
         await myQuery(`DELETE FROM ${categoryChoice} WHERE id=${result.deleteChoice.id}`)
     })
+    .then(db.end())
+}
+
+async function addEntry(){
+    const answers = []
+    // const singular = categoryChoice.slice(0, -1);
+    const columnsData = await myQuery(`SHOW COLUMNS FROM ${categoryChoice}`);
+    const columnNames = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true).join(', ')
+    const columns = columnsData.map((column)=>column.Field).filter((entry)=>entry==='id'? false:true)
+    .map((q)=>{
+        return {
+            type: 'input',
+            message: `Enter ${q}.`,
+            name: 'columnAnswers'
+        }
+    })
+    for (let i =0; i<columns.length; i++){
+        const result = await prompt(columns[i])
+        answers.push(result)
+    }
+    const formatAnswers = answers.map((answer)=>answer.columnAnswers).join(', ');
+    console.log(formatAnswers)
+    await myQuery(`INSERT INTO ${categoryChoice}(${columnNames}) VALUES ?`, formatAnswers);
+    // columns.forEach(async (column)=>{
+    //     prompt([{
+    //         columns
+    //     }])
+    //     .then((result)=>{
+    //         console.log(result)
+    //         answers.push(result.columnAnswers);
+    //     })
+    //     console.log(answers)
+    //     // await myQuery(`INSERT INTO ${categoryChoice} SET ${answers}`);
+    // })
+    // prompt(columns)
+    // .then((results)=>{
+    //     console.log(results)
+    // })
+    // console.log(columns)
+    // prompt(columns).then((results)=>{console.log(results)})
+
 }
 
 // Special Questions
@@ -138,6 +179,8 @@ async function myQuery(query){
 async function init(){
     // const testa = 'departments'
     // const test = await myQuery(`SELECT * FROM ${testa}`)
+    // console.log(test)
+    // const test = await myQuery("SHOW COLUMNS FROM roles")
     // console.log(test)
     await loadFirstQuestion();
 };
